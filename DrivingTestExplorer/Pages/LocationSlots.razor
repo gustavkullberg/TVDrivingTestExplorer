@@ -1,0 +1,55 @@
+﻿@page "/locations/{LocationId}"
+
+<PageTitle>Location</PageTitle>
+
+@using DrivingTestExplorer.Models
+@using DrivingTestExplorer.Services
+@using DrivingTestExplorer.Integration
+@using DrivingTestExplorer.Integration.Models
+@inject TrafikverketApiService TrafikverketService
+@inject LocationService LocationCandidateService
+
+
+<h1>@location?.Name</h1>
+<p>These are available times for @location?.Name</p>
+
+
+@if (slots == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Price</th>
+                <th>Late Cancellation</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var slot in @slots)
+            {
+                <tr>
+                    <td>@slot.Date</td>
+                    <td>@slot.Price</td>
+                    <td>@slot.IsLateCancellation</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Slot>? slots;
+    private Location location;
+    [Parameter]
+    public string LocationId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        location = await TrafikverketService.GetLocation(int.Parse(LocationId));
+        slots = (await LocationCandidateService.GetSingle(location?.Name))?.Slots?.ToList();
+    }
+}

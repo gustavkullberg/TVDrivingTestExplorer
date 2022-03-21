@@ -1,0 +1,51 @@
+﻿@page "/locations"
+
+<PageTitle>Weather forecast</PageTitle>
+
+@using DrivingTestExplorer.Integration
+@using DrivingTestExplorer.Integration.Models
+@inject TrafikverketApiService TrafikverketService
+@inject NavigationManager NavManager
+
+
+<h1>Locations</h1>
+
+<p>These are the trafikverket locations</p>
+
+@if (locations == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var location in locations)
+            {
+                <tr @onclick="() => Redirect(location.Id)">
+                    <td>@location.Id</td>
+                    <td>@location.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IEnumerable<Location>? locations;
+
+    private void Redirect(int locationId)
+    {
+        NavManager.NavigateTo($"/locations/{locationId}");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        locations = await TrafikverketService.GetLocations();
+    }
+}

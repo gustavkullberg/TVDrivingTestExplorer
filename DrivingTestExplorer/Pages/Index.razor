@@ -1,0 +1,88 @@
+﻿<style type="text/css">
+    .green {
+        background-color: green;
+    }
+</style>
+@page "/"
+
+<PageTitle>Index</PageTitle>
+
+@using DrivingTestExplorer.Services
+@using DrivingTestExplorer.Integration
+@using DrivingTestExplorer.Integration.Models
+@using System.Threading
+@using DrivingTestExplorer.Models
+@using Orleans.Streams
+@inject TrafikverketApiService TrafikverketService
+@inject LocationService LocationService
+@inject NavigationManager NavManager
+
+
+<h1>Top slots</h1>
+
+<p>These are the best available time slots.</p>
+
+@if (locations == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Distance</th>
+                <th>Late Cancellation</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var location in locations)
+            {
+                var color = location.TopSlot.Date < DateTime.Now.AddDays(10) ? "green" : "white";
+                <tr class=@color @onclick="() => Redirect(location.Location.Id)">
+                    <td>@location.Location.Name</td>
+                    <td>@location.TopSlot.Date</td>
+                    <td>@location.Distance</td>
+                    <td>@location.TopSlot.IsLateCancellation</td>
+                    <td>@location.UpdatedAt</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Models.LocationModel>? locations;
+    private StreamSubscriptionHandle<LocationNotification>? subscription;
+
+    private void Redirect(int locationId)
+    {
+        NavManager.NavigateTo($"/locations/{locationId}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        locations = await LocationService.Get();
+        subscription = await LocationService.SubscribeAsync(
+            Guid.Empty,
+            notification => InvokeAsync(
+                () => HandleNotificationAsync(notification)));
+    }
+
+    private Task HandleNotificationAsync(LocationNotification notification)
+    {
+        if (locations is null) return Task.CompletedTask;
+
+        locations.RemoveAll(l => l.Location.Name == notification.Key);
+        locations.Add(notification.Item);
+        locations = locations
+            .Where(x => x.TopSlot.Date < DateTime.Parse("2100-01-01"))
+            .OrderBy(x => x.TopSlot.Date)
+            .ToList();
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+}
