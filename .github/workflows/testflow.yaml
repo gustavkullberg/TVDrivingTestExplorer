@@ -3,9 +3,6 @@ on: [push, workflow_dispatch]
 jobs:
   First-Job:
     runs-on: ubuntu-latest
-    environment:
-      name: dev
-      url: https://google.com
     outputs:
       version: ${{steps.set-version.outputs.new_tag}}
       changelog: ${{steps.set-version.outputs.changelog}}
@@ -21,11 +18,8 @@ jobs:
           tag_prefix: ""
           default_bump: minor
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-  Just-Another-Job:
+  Creating release:
     runs-on: ubuntu-latest
-    environment:
-      name: prod
-      url: https://twitter.com
     needs: First-Job
     steps:
       - run: echo "🎉 This job needed First-Job"

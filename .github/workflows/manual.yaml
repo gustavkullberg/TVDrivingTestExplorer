@@ -1,0 +1,18 @@
+name: Manual Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      tag-id:
+        description: Tag id to deploy
+        require: true
+jobs:
+  First-Job:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://google.com
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{github.event.inputs.tag-id}}
+      - run: echo "🎉 Deploy code with tag ${{github.event.inputs.tag-id}}. The job was automatically triggered by a ${{ github.event_name }} event."
