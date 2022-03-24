@@ -6,7 +6,17 @@ jobs:
     environment:
       name: dev
       url: https://google.com
+    outputs:
+      version: ${{steps.set-version.outputs.new_tag}}
+      changelog: ${{steps.set-version.outputs.changelog}}
     steps:
+      - name: Bump version and push tag
+        id: set-version
+        uses: mathieudutour/github-tag-action@v4.5
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          tag_prefix: ""
+          default_bump: minor
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
   Just-Another-Job:
     runs-on: ubuntu-latest
@@ -16,3 +26,11 @@ jobs:
     needs: First-Job
     steps:
       - run: echo "🎉 This job needed First-Job"
+      - name: "Create github release"
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: ${{needs.First-Job.outputs.version}}
+          release_name: ${{needs.First-Job.outputs.version}}
+          body: ${{needs.First-Job.outputs.changelog}}
