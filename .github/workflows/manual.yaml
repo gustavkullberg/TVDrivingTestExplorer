@@ -9,7 +9,7 @@ jobs:
   First-Job:
     runs-on: ubuntu-latest
     environment:
-      name: prod
+      name: production
       url: https://google.com
     steps:
       - uses: actions/checkout@v2

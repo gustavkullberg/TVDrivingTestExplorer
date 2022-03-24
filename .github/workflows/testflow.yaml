@@ -31,3 +31,8 @@ jobs:
           tag_name: ${{needs.First-Job.outputs.version}}
           release_name: ${{needs.First-Job.outputs.version}}
           body: ${{needs.First-Job.outputs.changelog}}
+  Parallel-Job:
+    runs-on: ubuntu-latest
+    needs: First-Job
+    steps:
+      - run: echo "🎉 This job needed First-Job"
