@@ -3,10 +3,16 @@ on: [push, workflow_dispatch]
 jobs:
   First-Job:
     runs-on: ubuntu-latest
+    environment:
+      name: dev
+      url: https://google.com
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
   Just-Another-Job:
     runs-on: ubuntu-latest
+    environment:
+      name: prod
+      url: https://twitter.com
     needs: First-Job
     steps:
       - run: echo "🎉 This job needed First-Job"
