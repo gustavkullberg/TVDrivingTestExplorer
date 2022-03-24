@@ -1,4 +1,4 @@
-name: Just Another Action
+name: On Push
 on: [push, workflow_dispatch]
 jobs:
   First-Job:
