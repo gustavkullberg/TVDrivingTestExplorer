@@ -23,7 +23,7 @@ jobs:
     needs: First-Job
     steps:
       - run: echo "🎉 This job needed First-Job"
-      - name: "Create Github Release"
+      - name: "Create Github Release!"
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
